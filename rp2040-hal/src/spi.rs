@@ -1,3 +1,6 @@
+#![allow(missing_docs)]
+#![allow(unused)]
+
 //! Serial Peripheral Interface (SPI)
 //!
 //! See [Chapter 4 Section 4](https://datasheets.raspberrypi.org/rp2040/rp2040_datasheet.pdf) for more details
@@ -67,7 +70,7 @@ impl CsPin<SPI0> for Gpio17 {}
 impl SckPin<SPI0> for Gpio18 {}
 impl TxPin<SPI0> for Gpio19 {}
 
-// Dummy pins to allow no-cs/no-tx/no-rx configurationsc
+// Dummy pins to allow no-cs/no-tx/no-rx configurations
 pub struct DummyTxSpi0 {}
 impl Sealed for DummyTxSpi0 {}
 pub struct DummyRxSpi0 {}
