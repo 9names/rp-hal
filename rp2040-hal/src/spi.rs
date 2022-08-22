@@ -44,7 +44,6 @@ impl CsPin<SPI0> for Gpio1 {}
 
 impl SckPin<SPI0> for Gpio2 {}
 impl TxPin<SPI0> for Gpio3 {}
-
 impl RxPin<SPI0> for Gpio4 {}
 impl CsPin<SPI0> for Gpio5 {}
 
@@ -56,7 +55,6 @@ impl CsPin<SPI1> for Gpio9 {}
 
 impl SckPin<SPI1> for Gpio10 {}
 impl TxPin<SPI1> for Gpio11 {}
-
 impl RxPin<SPI1> for Gpio12 {}
 impl CsPin<SPI1> for Gpio13 {}
 
@@ -68,6 +66,28 @@ impl CsPin<SPI0> for Gpio17 {}
 
 impl SckPin<SPI0> for Gpio18 {}
 impl TxPin<SPI0> for Gpio19 {}
+
+// Dummy pins to allow no-cs/no-tx/no-rx configurationsc
+pub struct DummyTxSpi0 {}
+impl Sealed for DummyTxSpi0 {}
+pub struct DummyRxSpi0 {}
+impl Sealed for DummyRxSpi0 {}
+pub struct DummyCsSpi0 {}
+impl Sealed for DummyCsSpi0 {}
+pub struct DummyTxSpi1 {}
+impl Sealed for DummyTxSpi1 {}
+pub struct DummyRxSpi1 {}
+impl Sealed for DummyRxSpi1 {}
+pub struct DummyCsSpi1 {}
+impl Sealed for DummyCsSpi1 {}
+
+impl TxPin<SPI0> for DummyTxSpi0 {}
+impl RxPin<SPI0> for DummyRxSpi0 {}
+impl CsPin<SPI0> for DummyCsSpi0 {}
+
+impl TxPin<SPI1> for DummyTxSpi1 {}
+impl RxPin<SPI1> for DummyRxSpi1 {}
+impl CsPin<SPI1> for DummyCsSpi1 {}
 
 /// State of the SPI
 pub trait State {}
