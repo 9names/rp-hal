@@ -22,6 +22,7 @@ members = [
     "boards/sparkfun-pro-micro-rp2040",
     "boards/sparkfun-thing-plus-rp2040",
     "boards/vcc-gnd-yd-rp2040",
+    "target-tests"
 ]
 
 [patch.'https://github.com/rp-rs/rp-hal.git']
