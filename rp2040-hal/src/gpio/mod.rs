@@ -1555,6 +1555,34 @@ mod eh1 {
         }
     }
 
+    impl<I, P> StatefulOutputPin for Pin<I, DynFunction, P>
+    where
+        I: PinId,
+        P: PullType,
+    {
+        fn is_set_high(&mut self) -> Result<bool, Self::Error> {
+            if self.function() != DynFunction::Sio(super::DynSioConfig::Output) {
+                return Err(DynFunctionError::InvalidFunction);
+            }
+            Ok(self._is_set_high())
+        }
+
+        fn is_set_low(&mut self) -> Result<bool, Self::Error> {
+            if self.function() != DynFunction::Sio(super::DynSioConfig::Output) {
+                return Err(DynFunctionError::InvalidFunction);
+            }
+            Ok(self._is_set_low())
+        }
+
+        fn toggle(&mut self) -> Result<(), Self::Error> {
+            if self.function() != DynFunction::Sio(super::DynSioConfig::Output) {
+                return Err(DynFunctionError::InvalidFunction);
+            }
+            self._toggle();
+            Ok(())
+        }
+    }
+
     impl<I, P> InputPin for Pin<I, FunctionSio<SioInput>, P>
     where
         I: PinId,
@@ -1565,6 +1593,26 @@ mod eh1 {
         }
 
         fn is_low(&mut self) -> Result<bool, Self::Error> {
+            Ok(self._is_low())
+        }
+    }
+
+    impl<I, P> InputPin for Pin<I, DynFunction, P>
+    where
+        I: PinId,
+        P: PullType,
+    {
+        fn is_high(&mut self) -> Result<bool, Self::Error> {
+            if self.function() != DynFunction::Sio(super::DynSioConfig::Input) {
+                return Err(DynFunctionError::InvalidFunction);
+            }
+            Ok(self._is_high())
+        }
+
+        fn is_low(&mut self) -> Result<bool, Self::Error> {
+            if self.function() != DynFunction::Sio(super::DynSioConfig::Input) {
+                return Err(DynFunctionError::InvalidFunction);
+            }
             Ok(self._is_low())
         }
     }
