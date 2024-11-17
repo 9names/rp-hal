@@ -1471,39 +1471,35 @@ impl<T: AnyPin> embedded_hal_0_2::digital::v2::OutputPin for InOutPin<T> {
 ///
 ///
 /// <https://how2electronics.com/interfacing-dht11-temperature-humidity-sensor-with-raspberry-pi-pico/>
-pub struct DynInOutPin<T: AnyPin> {
-    inner: Pin<DynPinId, FunctionSioOutput, T::Pull>,
+pub struct DynInOutPin {
+    inner: Pin<DynPinId, DynFunction, PullNone>
 }
 
-impl<T: AnyPin> DynInOutPin<T> {
+impl DynInOutPin {
     /// Create a new wrapper
-    pub fn new(inner: T) -> DynInOutPin<T>
-    where
-        T::Id: ValidFunction<FunctionSioOutput>,
+    pub fn new(inner: Pin<DynPinId, DynFunction, PullNone>) -> DynInOutPin
     {
-        let mut inner = inner.into();
+        let mut inner:Pin<DynPinId, DynFunction, PullNone> = inner.into();
         inner.set_output_enable_override(OutputEnableOverride::Disable);
-
-        // into Pin<_, FunctionSioOutput, _>
-        let inner = inner.into_push_pull_output_in_state(PinState::Low).into_dyn_pin();
 
         Self { inner }
     }
 }
 
 
-impl<T: AnyPin> embedded_hal_0_2::digital::v2::InputPin for DynInOutPin<T> {
+
+impl embedded_hal_0_2::digital::v2::InputPin for DynInOutPin {
     type Error = Error;
     fn is_high(&self) -> Result<bool, Error> {
-        self.inner.is_high()
+        Ok(self.inner._is_set_high())
     }
 
     fn is_low(&self) -> Result<bool, Error> {
-        self.inner.is_low()
+        Ok(self.inner._is_set_low())
     }
 }
 
-impl<T: AnyPin> embedded_hal_0_2::digital::v2::OutputPin for DynInOutPin<T> {
+impl embedded_hal_0_2::digital::v2::OutputPin for DynInOutPin {
     type Error = Error;
     fn set_low(&mut self) -> Result<(), Error> {
         // The pin is already set to output low but this is inhibited by the override.
@@ -1646,16 +1642,12 @@ mod eh1 {
         }
     }
 
-    impl<I> ErrorType for DynInOutPin<I>
-    where
-        I: AnyPin,
+    impl ErrorType for DynInOutPin
     {
         type Error = Error;
     }
 
-    impl<I> OutputPin for DynInOutPin<I>
-    where
-        I: AnyPin,
+    impl OutputPin for DynInOutPin
     {
         fn set_low(&mut self) -> Result<(), Self::Error> {
             // The pin is already set to output low but this is inhibited by the override.
@@ -1673,9 +1665,7 @@ mod eh1 {
         }
     }
 
-    impl<I> InputPin for DynInOutPin<I>
-    where
-        I: AnyPin,
+    impl InputPin for DynInOutPin
     {
         fn is_high(&mut self) -> Result<bool, Self::Error> {
             Ok(self.inner._is_high())
