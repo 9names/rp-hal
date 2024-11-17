@@ -1463,12 +1463,70 @@ impl<T: AnyPin> embedded_hal_0_2::digital::v2::OutputPin for InOutPin<T> {
     }
 }
 
+/// A dynamic wrapper [`AnyPin`]`<Function = `[`FunctionSioOutput`]`>` emulating open-drain function.
+///
+/// This wrapper implements both InputPin and OutputPin, to simulate an open-drain pin as needed for
+/// example by the wire protocol the DHT11 sensor speaks.
+/// Unlike the base version, it uses DynPin internally so it can easily be stored in an array
+///
+///
+/// <https://how2electronics.com/interfacing-dht11-temperature-humidity-sensor-with-raspberry-pi-pico/>
+pub struct DynInOutPin<T: AnyPin> {
+    inner: Pin<DynPinId, FunctionSioOutput, T::Pull>,
+}
+
+impl<T: AnyPin> DynInOutPin<T> {
+    /// Create a new wrapper
+    pub fn new(inner: T) -> DynInOutPin<T>
+    where
+        T::Id: ValidFunction<FunctionSioOutput>,
+    {
+        let mut inner = inner.into();
+        inner.set_output_enable_override(OutputEnableOverride::Disable);
+
+        // into Pin<_, FunctionSioOutput, _>
+        let inner = inner.into_push_pull_output_in_state(PinState::Low).into_dyn_pin();
+
+        Self { inner }
+    }
+}
+
+
+impl<T: AnyPin> embedded_hal_0_2::digital::v2::InputPin for DynInOutPin<T> {
+    type Error = Error;
+    fn is_high(&self) -> Result<bool, Error> {
+        self.inner.is_high()
+    }
+
+    fn is_low(&self) -> Result<bool, Error> {
+        self.inner.is_low()
+    }
+}
+
+impl<T: AnyPin> embedded_hal_0_2::digital::v2::OutputPin for DynInOutPin<T> {
+    type Error = Error;
+    fn set_low(&mut self) -> Result<(), Error> {
+        // The pin is already set to output low but this is inhibited by the override.
+        self.inner
+            .set_output_enable_override(OutputEnableOverride::Enable);
+        Ok(())
+    }
+
+    fn set_high(&mut self) -> Result<(), Error> {
+        // To set the open-drain pin to high, just disable the output driver by configuring the
+        // output override. That way, the DHT11 can still pull the data line down to send its response.
+        self.inner
+            .set_output_enable_override(OutputEnableOverride::Disable);
+        Ok(())
+    }
+}
+
+
 mod eh1 {
     use embedded_hal::digital::{ErrorType, InputPin, OutputPin, StatefulOutputPin};
 
     use super::{
-        func, AnyPin, AsInputPin, Error, FunctionSio, InOutPin, OutputEnableOverride, Pin, PinId,
-        PullType, SioConfig, SioInput, SioOutput,
+        func, AnyPin, AsInputPin, DynInOutPin, Error, FunctionSio, InOutPin, OutputEnableOverride, Pin, PinId, PullType, SioConfig, SioInput, SioOutput
     };
 
     impl<I, P, S> ErrorType for Pin<I, FunctionSio<S>, P>
@@ -1576,6 +1634,46 @@ mod eh1 {
     }
 
     impl<I> InputPin for InOutPin<I>
+    where
+        I: AnyPin,
+    {
+        fn is_high(&mut self) -> Result<bool, Self::Error> {
+            Ok(self.inner._is_high())
+        }
+
+        fn is_low(&mut self) -> Result<bool, Self::Error> {
+            Ok(self.inner._is_low())
+        }
+    }
+
+    impl<I> ErrorType for DynInOutPin<I>
+    where
+        I: AnyPin,
+    {
+        type Error = Error;
+    }
+
+    impl<I> OutputPin for DynInOutPin<I>
+    where
+        I: AnyPin,
+    {
+        fn set_low(&mut self) -> Result<(), Self::Error> {
+            // The pin is already set to output low but this is inhibited by the override.
+            self.inner
+                .set_output_enable_override(OutputEnableOverride::Enable);
+            Ok(())
+        }
+
+        fn set_high(&mut self) -> Result<(), Self::Error> {
+            // To set the open-drain pin to high, just disable the output driver by configuring the
+            // output override. That way, the DHT11 can still pull the data line down to send its response.
+            self.inner
+                .set_output_enable_override(OutputEnableOverride::Disable);
+            Ok(())
+        }
+    }
+
+    impl<I> InputPin for DynInOutPin<I>
     where
         I: AnyPin,
     {
