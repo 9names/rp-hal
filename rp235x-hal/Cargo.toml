@@ -13,7 +13,7 @@ version = "0.3.0"
 
 [package.metadata.docs.rs]
 features = ["rt", "defmt", "rtic-monotonic"]
-targets = ["thumbv8m.main-none-eabihf"]
+targets = ["riscv32imac-unknown-none-elf", "thumbv8m.main-none-eabihf"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
