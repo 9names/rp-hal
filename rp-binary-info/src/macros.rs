@@ -146,6 +146,19 @@ macro_rules! rp_program_description {
     };
 }
 
+/// Generate a static item containing the `CARGO_PKG_DESCRIPTION` as the program description,
+/// and return its [`EntryAddr`](super::EntryAddr).
+#[macro_export]
+macro_rules! rp_cargo_description {
+    () => {
+        $crate::env!(
+            $crate::consts::TAG_RASPBERRY_PI,
+            $crate::consts::ID_RP_PROGRAM_DESCRIPTION,
+            "CARGO_PKG_DESCRIPTION"
+        )
+    };
+}
+
 /// Generate a static item containing whether this is a debug or a release
 /// build, and return its [`EntryAddr`](super::EntryAddr).
 #[macro_export]
